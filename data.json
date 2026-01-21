@@ -1,0 +1,24 @@
+[
+  {
+    "id": "gambang",
+    "name": "Gambang (Barung & Penerus)",
+    "description": "Gambang adalah alat musik tradisional yang terdiri dari bilah-bilah kayu yang disusun di atas rak kayu, dimainkan dengan cara dipukul menggunakan alat pemukul khusus.",
+    "modelSrc": "assets/3d/gambang.glb",
+    "videoSrc": "https://www.youtube.com/embed/P-A_6z2X0W0",
+    "hotspot": {
+      "data-position": "0.03399077534060879m 0.2840307354402675m -0.008632815610825184m",
+      "data-normal": "-0.0033486780006559873m 0.9999942716759267m 0.0004929208667617334m"
+    }
+  },
+  {
+    "id": "dhendhem",
+    "name": "Dhendhem",
+    "description": "Dhendhem adalah instrumen musik dalam ansambel Calung Banyumasan yang berfungsi sebagai pemangku irama dengan nada-nada rendah yang khas.",
+    "modelSrc": "assets/3d/dhendhem.glb",
+    "videoSrc": "https://www.youtube.com/embed/P-A_6z2X0W0",
+    "hotspot": {
+      "data-position": "-0.003871021270083208m 0.1994717847450865m -1.103001464517813m",
+      "data-normal": "0.7734619860907876m -0.6332662095867199m 0.027027095074447175m"
+    }
+  }
+]
