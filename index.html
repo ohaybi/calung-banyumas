@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -27,16 +28,19 @@
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
       }
+      model-viewer {
+        --progress-bar-color: #14b8a6;
+      }
     </style>
   </head>
   <body class="bg-white min-h-screen font-jakarta">
     <!-- Navigation -->
-    <nav class="sticky top-0 z-30 bg-white/20 backdrop-blur-md flex items-center justify-between px-4 py-3">
-      <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-primary-dark transition-colors">
-        <span class="text-lg">🏠</span>
+    <nav class="sticky top-0 z-30 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-100">
+      <button class="bg-teal-500 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-teal-600 transition-colors shadow-sm">
+        <span class="text-base">🏠</span>
         Beranda
       </button>
-      <a href="explore.html" class="text-gray-700 font-medium flex items-center gap-1 hover:text-primary transition-colors">
+      <a href="explore.html" class="text-slate-600 font-medium flex items-center gap-1 hover:text-teal-500 transition-colors">
         Explore
         <span>🚀</span>
       </a>
@@ -45,67 +49,93 @@
     <!-- Main Content -->
     <main class="px-4 max-w-md mx-auto">
       <!-- Hero Section -->
-      <section class="text-center py-6">
-        <h1 class="text-4xl font-bold text-gray-900 leading-tight">Calung</h1>
-        <h1 class="text-4xl font-bold text-primary leading-tight">Banyumas</h1>
-        <p class="text-gray-500 text-sm mt-3">Kolaborasi Amikom Purwokerto dan<br />Rumah Lengger Banyumas</p>
+      <section class="text-center py-8">
+        <h1 class="text-4xl font-bold text-slate-800 leading-tight">Calung</h1>
+        <h1 class="text-4xl font-bold text-teal-500 leading-tight">Banyumas</h1>
+        <p class="text-slate-400 text-sm mt-3">Kolaborasi Amikom Purwokerto dan<br />Rumah Lengger</p>
       </section>
 
-      <!-- 3D Preview -->
-      <section class="relative my-6">
-        <div class="bg-gradient-to-b from-gray-100 to-gray-200 rounded-3xl p-6 relative overflow-hidden aspect-square flex items-center justify-center">
-          <!-- Decorative gradient circle -->
-          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-gradient-to-t from-primary/20 to-transparent rounded-full blur-xl"></div>
+      <!-- Instrument Grid Section -->
+      <section class="pb-8">
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Gambang Card -->
+          <a href="explore.html?id=gambang" class="group">
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300">
+              <div class="aspect-square w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                <model-viewer src="assets/3d/gambang-compressed.glb" alt="Gambang 3D Model" auto-rotate camera-controls disable-zoom shadow-intensity="0.5" class="w-full h-full"> </model-viewer>
+              </div>
+              <p class="text-center text-slate-600 text-sm font-medium mt-3 group-hover:text-teal-600 transition-colors">Gambang</p>
+            </div>
+          </a>
 
-          <div class="relative z-10 w-full h-full">
-            <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-            <model-viewer src="assets/3d/gambang-compressed.glb" alt="Calung Instrument 3D Model" auto-rotate camera-controls shadow-intensity="1" class="w-full h-full outline-none"> </model-viewer>
-          </div>
-        </div>
+          <!-- Dhendhem Card -->
+          <a href="explore.html?id=dhendhem" class="group">
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300">
+              <div class="aspect-square w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                <model-viewer src="assets/3d/dhendhem-compressed.glb" alt="Dhendhem 3D Model" auto-rotate camera-controls disable-zoom shadow-intensity="0.5" class="w-full h-full"> </model-viewer>
+              </div>
+              <p class="text-center text-slate-600 text-sm font-medium mt-3 group-hover:text-teal-600 transition-colors">Dhendhem</p>
+            </div>
+          </a>
 
-        <!-- CTA Button -->
-        <div class="flex justify-center -mt-6 relative z-20">
-          <a href="explore.html" class="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg shadow-primary/30 flex items-center gap-2 transform hover:scale-105 transition-all duration-300">
-            Explore Calung
-            <span class="text-xl">🚀</span>
+          <!-- Kenong Card -->
+          <a href="explore.html?id=kenong" class="group">
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300">
+              <div class="aspect-square w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                <model-viewer src="assets/3d/gambang-compressed.glb" alt="Kenong 3D Model" auto-rotate camera-controls disable-zoom shadow-intensity="0.5" class="w-full h-full"> </model-viewer>
+              </div>
+              <p class="text-center text-slate-600 text-sm font-medium mt-3 group-hover:text-teal-600 transition-colors">Kenong</p>
+            </div>
+          </a>
+
+          <!-- Gong Bumbung Card -->
+          <a href="explore.html?id=gong-bumbung" class="group">
+            <div class="bg-slate-50 rounded-2xl p-3 border border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-500/10 transition-all duration-300">
+              <div class="aspect-square w-full overflow-hidden rounded-xl bg-white flex items-center justify-center">
+                <model-viewer src="assets/3d/gambang-compressed.glb" alt="Gong Bumbung 3D Model" auto-rotate camera-controls disable-zoom shadow-intensity="0.5" class="w-full h-full"> </model-viewer>
+              </div>
+              <p class="text-center text-slate-600 text-sm font-medium mt-3 group-hover:text-teal-600 transition-colors">Gong Bumbung</p>
+            </div>
           </a>
         </div>
       </section>
 
       <!-- Divider -->
-      <hr class="border-gray-200 my-8" />
+      <hr class="border-slate-200 my-4" />
 
       <!-- About Section -->
-      <section id="explore" class="py-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Tentang Proyek</h2>
-
+      <section id="about" class="py-6">
         <div class="space-y-4">
           <div>
-            <h3 class="text-lg font-bold text-gray-900">Calung Banyumas</h3>
-            <p class="text-gray-500 text-sm">Penelitian Alat Musik Tradisional Banyumas</p>
+            <h2 class="text-xl font-bold text-slate-800">Calung Banyumas</h2>
+            <p class="text-slate-400 text-sm">Penelitian Alat Musik Tradisional</p>
           </div>
 
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Calung adalah musik tradisional dengan perangkat instrument mirip gamelan terbuat dari bambu wulung. Musik calung hidup di komunitas masyarakat pedesaan di wilayah sebaran budaya Banyumas.
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Lorem ipsum dolor sit amet consectetur. Viverra nisl interdum convallis sed consectetur amet turpis. Consequat vitae et vel cursus aliquet nec facilisis. Ultrices arcu condimentum tristique netus id lectus. Suspendisse arcu
+            commodo cursus diam.
           </p>
 
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Spesifik musik calung adalah bentuk musik minimalis, yaitu dengan perangkat sederhana, namun mampu menghasilkan aransemen musikal yang lengkap. Perangkat musik calung terdiri atas gambang barung, gambang penerus, dhendhem,
-            kenong, gong bumbung, dan kendhang. Perangkat musik ini berlaras slendro dengan nada-nada 1 (ji), 2 (ro), 3 (lu), 5 (ma), 6 (nem).
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Lorem ipsum dolor sit amet consectetur. Viverra nisl interdum convallis sed consectetur amet turpis. Consequat vitae et vel cursus aliquet nec facilisis. Ultrices arcu condimentum tristique netus id lectus. Suspendisse arcu
+            commodo cursus diam.
           </p>
         </div>
       </section>
 
+      <!-- Divider -->
+      <hr class="border-slate-200 my-4" />
+
       <!-- Donation Section -->
       <section class="py-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-3">Donasi</h2>
+        <h2 class="text-xl font-bold text-slate-800 mb-3">Donasi</h2>
 
         <div class="flex items-start justify-between gap-4">
-          <p class="text-gray-600 text-sm">Donasi untuk <a href="#" class="text-primary font-medium hover:underline">Rumah Lengger</a>.</p>
+          <p class="text-slate-500 text-sm">Donasi untuk <a href="#" class="text-teal-500 font-medium hover:underline">Rumah Lengger</a>.</p>
 
-          <!-- QR Code Placeholder -->
+          <!-- QR Code -->
           <div class="flex-shrink-0">
-            <div class="w-24 h-24 bg-white border border-gray-200 rounded-lg p-1.5 shadow-sm">
+            <div class="w-24 h-24 bg-white border border-slate-200 rounded-xl p-1.5 shadow-sm">
               <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://rumahlengger.com/donasi" alt="QR Code Donasi" class="w-full h-full object-contain" />
             </div>
           </div>
@@ -113,9 +143,9 @@
       </section>
 
       <!-- Footer -->
-      <footer class="text-center py-8 border-t border-gray-100 mt-8">
-        <p class="text-gray-500 text-sm">
-          2001 — Abdilah Mufti<br />
+      <footer class="text-center py-8 border-t border-slate-100 mt-6">
+        <p class="text-slate-400 text-sm">
+          2001 — Abdillah Mufti<br />
           AMIKOM PURWOKERTO X RUMAH LENGGER
         </p>
       </footer>

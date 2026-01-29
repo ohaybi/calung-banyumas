@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="utf-8" />
@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -27,249 +28,601 @@
       body {
         font-family: "Plus Jakarta Sans", sans-serif;
       }
+      model-viewer {
+        --progress-bar-color: #14b8a6;
+      }
 
-      /* Pulsing hotspot animation */
-      @keyframes pulse-ring {
+      /* Play Mode Styles */
+      .play-mode {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #99f6e4 100%);
+        display: none;
+        flex-direction: column;
+      }
+
+      .play-mode.active {
+        display: flex;
+      }
+
+      /* Hotspot Button Styles */
+      .hotspot-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid #14b8a6;
+        color: #0d9488;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
+        position: absolute;
+        z-index: 10;
+      }
+
+      .hotspot-btn:hover {
+        transform: scale(1.15);
+        box-shadow: 0 4px 16px rgba(20, 184, 166, 0.5);
+      }
+
+      .hotspot-btn:active,
+      .hotspot-btn.playing {
+        transform: scale(0.95);
+        background: #14b8a6;
+        color: white;
+        box-shadow: 0 0 20px rgba(20, 184, 166, 0.8);
+      }
+
+      /* Ripple Effect */
+      @keyframes ripple {
         0% {
           transform: scale(1);
           opacity: 1;
         }
         100% {
-          transform: scale(2);
+          transform: scale(2.5);
           opacity: 0;
         }
       }
 
-      .hotspot {
+      .hotspot-btn::after {
+        content: "";
         position: absolute;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        z-index: 10;
-      }
-
-      .hotspot-inner {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 14px;
-        height: 14px;
-        background: white;
-        border: 3px solid #14b8a6;
-        border-radius: 50%;
-        z-index: 2;
-        transition: all 0.3s ease;
-      }
-
-      .hotspot:hover .hotspot-inner {
-        transform: translate(-50%, -50%) scale(1.2);
-        box-shadow: 0 0 12px rgba(20, 184, 166, 0.5);
-      }
-
-      .hotspot-ring {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 14px;
-        height: 14px;
-        border: 2px solid #14b8a6;
-        border-radius: 50%;
-        animation: pulse-ring 1.5s ease-out infinite;
-      }
-
-      /* Bottom sheet styling */
-      .bottom-sheet {
-        transition: transform 0.3s ease-out;
-      }
-
-      .drag-handle {
-        width: 48px;
-        height: 5px;
-        background: #d1d5db;
-        border-radius: 9999px;
-      }
-
-      /* Smooth image container */
-      .image-container {
-        position: relative;
         width: 100%;
-        height: calc(100vh - 60px - 80px);
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid #14b8a6;
+        opacity: 0;
+      }
+
+      .hotspot-btn.playing::after {
+        animation: ripple 0.6s ease-out;
+      }
+
+      /* Instruction Banner */
+      .instruction-banner {
+        background: rgba(20, 184, 166, 0.95);
+        backdrop-filter: blur(8px);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 500;
+        font-size: 12px;
+        box-shadow: 0 2px 12px rgba(20, 184, 166, 0.4);
+      }
+
+      /* Landscape prompt for portrait mode */
+      .rotate-prompt {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.95);
+        z-index: 200;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        padding: 24px;
+      }
+
+      .rotate-prompt.show {
+        display: flex;
+      }
+
+      @keyframes rotate-phone {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        50% {
+          transform: rotate(90deg);
+        }
+      }
+
+      .rotate-icon {
+        font-size: 64px;
+        animation: rotate-phone 2s ease-in-out infinite;
+      }
+
+      /* Model viewer container in play mode */
+      .play-viewer-container {
+        flex: 1;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         overflow: hidden;
       }
 
-      .instrument-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
+      /* 3D Hotspot Styles (inside model-viewer) */
+      .hotspot-3d {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid #14b8a6;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 10px rgba(20, 184, 166, 0.4);
+        position: relative;
       }
 
-      /* Tooltip styling */
-      .tooltip {
-        position: absolute;
-        background: white;
-        padding: 12px 16px;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-        z-index: 20;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(10px);
-        transition: all 0.3s ease;
-        min-width: 200px;
-        max-width: 280px;
+      .hotspot-3d:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 20px rgba(20, 184, 166, 0.6);
       }
 
-      .tooltip.active {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+      .hotspot-3d:active,
+      .hotspot-3d.playing {
+        transform: scale(0.9);
+        background: #14b8a6;
+        box-shadow: 0 0 25px rgba(20, 184, 166, 0.9);
       }
 
-      .tooltip::before {
+      .hotspot-3d.playing .hotspot-label {
+        color: white;
+      }
+
+      .hotspot-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #0d9488;
+        font-family: "Plus Jakarta Sans", sans-serif;
+        transition: color 0.15s ease;
+      }
+
+      /* Ripple animation for 3D hotspots */
+      .hotspot-3d::after {
         content: "";
         position: absolute;
-        bottom: 100%;
-        left: 20px;
-        border-width: 8px;
-        border-style: solid;
-        border-color: transparent transparent white transparent;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid #14b8a6;
+        opacity: 0;
+        pointer-events: none;
       }
 
-      .tooltip-title {
-        font-weight: 700;
-        color: #111827;
-        margin-bottom: 4px;
-      }
-
-      .tooltip-description {
-        font-size: 0.875rem;
-        color: #6b7280;
-        line-height: 1.5;
+      .hotspot-3d.playing::after {
+        animation: ripple 0.5s ease-out;
       }
     </style>
   </head>
-  <body class="bg-gray-50 min-h-screen font-jakarta overflow-hidden">
+  <body class="bg-white min-h-screen font-jakarta">
     <!-- Navigation -->
-    <nav class="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
-      <a href="index.html" class="text-gray-700 font-medium flex items-center gap-1.5 hover:text-primary transition-colors">
-        <span class="text-lg">🏠</span>
+    <nav class="sticky top-0 z-30 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-100">
+      <a href="index.html" class="bg-teal-500 text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 hover:bg-teal-600 transition-colors shadow-sm">
+        <span class="text-base">🏠</span>
         Beranda
       </a>
-      <button class="bg-primary text-white px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-1.5 shadow-md shadow-primary/20">
+      <span class="text-slate-600 font-medium flex items-center gap-1">
         Explore
         <span>🚀</span>
-      </button>
+      </span>
     </nav>
 
     <!-- Main Content -->
-    <main class="flex flex-col h-screen pt-[60px] overflow-hidden">
-      <!-- 3D Viewer Container -->
-      <div id="viewerContainer" class="flex-grow relative bg-gray-100 transition-all duration-500 ease-in-out">
-        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-        <model-viewer
-          id="viewer"
-          src="assets/3d/calung-full-compressed.glb"
-          alt="Calung Instrument 3D Model"
-          auto-rotate
-          camera-controls
-          shadow-intensity="1"
-          class="w-full h-full outline-none"
-          camera-orbit="0deg 75deg 2.5m"
-          field-of-view="30deg"
-          interpolation-decay="200"
-        >
-          <button class="hotspot" slot="hotspot-1" data-position="0.03399077534060879m 0.2840307354402675m -0.008632815610825184m" data-normal="-0.0033486780006559873m 0.9999942716759267m 0.0004929208667617334m" data-instrument="1">
-            <div class="hotspot-ring"></div>
-            <div class="hotspot-inner"></div>
-          </button>
+    <main class="px-4 max-w-md mx-auto pb-8">
+      <!-- 3D Viewer Section -->
+      <section class="py-6">
+        <div class="bg-slate-50 rounded-3xl p-4 border border-slate-100 shadow-sm">
+          <div class="aspect-square w-full overflow-hidden rounded-2xl bg-white flex items-center justify-center">
+            <model-viewer id="viewer" src="assets/3d/gambang-compressed.glb" alt="Instrument 3D Model" auto-rotate camera-controls shadow-intensity="0.8" class="w-full h-full" camera-orbit="0deg 75deg 2m" field-of-view="30deg">
+            </model-viewer>
+          </div>
 
-          <button class="hotspot" slot="hotspot-2" data-position="-0.003871021270083208m 0.1994717847450865m -1.103001464517813m" data-normal="0.7734619860907876m -0.6332662095867199m 0.027027095074447175m" data-instrument="2">
-            <div class="hotspot-ring"></div>
-            <div class="hotspot-inner"></div>
-          </button>
+          <!-- Play Button -->
+          <div class="flex justify-center mt-4">
+            <button id="playBtn" class="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-full font-semibold text-base shadow-lg shadow-teal-500/20 flex items-center gap-2 transform hover:scale-105 transition-all duration-300">
+              <span>🎹</span>
+              <span id="playBtnText">Main Gambang</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instrument Info Section -->
+      <section class="py-4">
+        <h1 id="instrumentName" class="text-2xl font-bold text-slate-800 mb-3">Gambang</h1>
+        <p id="instrumentDesc" class="text-slate-500 text-sm leading-relaxed text-justify">
+          Lorem ipsum dolor sit amet consectetur. Viverra nisl interdum convallis sed consectetur amet turpis. Consequat vitae et vel cursus aliquet nec facilisis. Ultrices arcu condimentum tristique netus id lectus. Suspendisse arcu
+          commodo cursus diam.
+        </p>
+      </section>
+
+      <!-- Video Section -->
+      <section class="py-4">
+        <h2 class="text-xl font-bold text-slate-800 mb-4">Video</h2>
+        <div class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
+          <iframe id="videoFrame" class="w-full h-full" src="https://www.youtube.com/embed/P-A_6z2X0W0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+          </iframe>
+        </div>
+      </section>
+
+      <!-- Divider -->
+      <hr class="border-slate-200 my-6" />
+
+      <!-- Footer -->
+      <footer class="text-center py-6">
+        <p class="text-slate-400 text-sm">
+          2026 — Abdillah Mufti<br />
+          AMIKOM PURWOKERTO X RUMAH LENGGER
+        </p>
+      </footer>
+    </main>
+
+    <!-- Play Mode Overlay -->
+    <div id="playMode" class="play-mode">
+      <!-- Back Button -->
+      <div class="absolute top-4 left-4 z-20">
+        <button id="backBtn" class="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 shadow-lg transition-all">
+          <span>←</span>
+          Kembali
+        </button>
+      </div>
+
+      <!-- Model Viewer Container -->
+      <div class="play-viewer-container">
+        <model-viewer
+          id="playViewer"
+          src="assets/3d/gambang-compressed.glb"
+          alt="Instrument 3D Model"
+          shadow-intensity="0.5"
+          class="w-full h-full"
+          camera-controls
+          camera-orbit="0deg 0deg 1.2m"
+          min-camera-orbit="0deg 0deg 0.5m"
+          max-camera-orbit="0deg 0deg 3m"
+          field-of-view="40deg"
+          interaction-prompt="none"
+          disable-pan
+        >
+          <!-- Hotspots will be generated dynamically via JavaScript -->
         </model-viewer>
       </div>
 
-      <!-- Info Panel (Non-overlapping Bottom Sheet) -->
-      <div id="bottomSheet" class="h-0 bg-white transition-all duration-500 ease-in-out overflow-hidden border-t border-gray-100">
-        <div class="h-full overflow-y-auto p-6">
-          <div class="max-w-2xl mx-auto">
-            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-6"></div>
-            <div id="sheetContent">
-              <!-- Content Injected via JS -->
-            </div>
-          </div>
-        </div>
+      <!-- Instruction Banner -->
+      <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-20">
+        <div class="instruction-banner">Tekan angka untuk bermain</div>
       </div>
-    </main>
+    </div>
+
+    <!-- Rotate Prompt (for portrait mode on mobile) -->
+    <div id="rotatePrompt" class="rotate-prompt">
+      <div class="rotate-icon">📱</div>
+      <h2 class="text-2xl font-bold mt-6 mb-2">Putar Perangkat Anda</h2>
+      <p class="text-slate-300">Untuk pengalaman terbaik, gunakan mode landscape</p>
+      <button id="continuePortrait" class="mt-6 bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-full font-medium transition-colors">Lanjutkan dengan Portrait</button>
+    </div>
 
     <script>
+      // ==================== Audio System ====================
+      class AudioSystem {
+        constructor() {
+          this.audioContext = null;
+          this.initialized = false;
+          // Pentatonic Slendro scale frequencies (approximate)
+          // Traditional Slendro: 1 (ji), 2 (ro), 3 (lu), 5 (ma), 6 (nem)
+          this.frequencies = [
+            220.0, // 1 - A3 (ji low)
+            247.5, // 2 - B3 (ro low)
+            275.0, // 3 - C#4 (lu low)
+            330.0, // 5 - E4 (ma low)
+            370.0, // 6 - F#4 (nem low)
+            440.0, // 1 - A4 (ji)
+            495.0, // 2 - B4 (ro)
+            550.0, // 3 - C#5 (lu)
+            660.0, // 5 - E5 (ma)
+            740.0, // 6 - F#5 (nem)
+            880.0, // 1 - A5 (ji high)
+            990.0, // 2 - B5 (ro high)
+            1100.0, // 3 - C#6 (lu high)
+            1320.0, // 5 - E6 (ma high)
+            1480.0, // 6 - F#6 (nem high)
+            1760.0, // 1 - A6 (ji highest)
+          ];
+        }
+
+        init() {
+          if (this.initialized) return;
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.initialized = true;
+        }
+
+        playNote(noteIndex) {
+          if (!this.audioContext) this.init();
+
+          const frequency = this.frequencies[noteIndex] || 440;
+          const oscillator = this.audioContext.createOscillator();
+          const gainNode = this.audioContext.createGain();
+
+          // Use triangle wave for wooden/bamboo-like sound
+          oscillator.type = "triangle";
+          oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+
+          // Add slight vibrato for more natural sound
+          const vibrato = this.audioContext.createOscillator();
+          const vibratoGain = this.audioContext.createGain();
+          vibrato.frequency.value = 5;
+          vibratoGain.gain.value = 2;
+          vibrato.connect(vibratoGain);
+          vibratoGain.connect(oscillator.frequency);
+          vibrato.start();
+
+          // Envelope - quick attack, medium decay for percussion feel
+          gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 0.01);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 1.2);
+
+          oscillator.connect(gainNode);
+          gainNode.connect(this.audioContext.destination);
+
+          oscillator.start();
+          oscillator.stop(this.audioContext.currentTime + 1.2);
+          vibrato.stop(this.audioContext.currentTime + 1.2);
+        }
+      }
+
+      const audioSystem = new AudioSystem();
+
+      // ==================== Instrument Data ====================
       const instrumentData = {
-        1: {
+        gambang: {
           name: "Gambang",
-          desc: "Gambang barung & penerus. Alat musik utama dalam ansambel calung yang terdiri dari deretan bilah bambu bernada yang dimainkan dengan cara dipukul.",
+          desc: "Lorem ipsum dolor sit amet consectetur. Viverra nisl interdum convallis sed consectetur amet turpis. Consequat vitae et vel cursus aliquet nec facilisis. Ultrices arcu condimentum tristique netus id lectus. Suspendisse arcu commodo cursus diam.",
+          modelSrc: "assets/3d/gambang-compressed.glb",
           video: "https://www.youtube.com/embed/P-A_6z2X0W0",
+          playText: "Main Gambang",
+          hotspotData: [
+            { position: "-0.36209952111936594m 0.2866251620646m 0.07933330430383345m", normal: "0.11263953583778749m 0.9936359166544361m 0.000010027278394431737m" },
+            { position: "-0.2919849479395945m 0.2889695827262259m 0.02600616509287347m", normal: "0.018659195856877288m 0.9998205318450036m 0.0032769667604586428m" },
+            { position: "-0.21916375933752136m 0.28647374925658275m 0.08195764237250441m", normal: "0.046426363879277996m 0.9989216670016023m 0.00030972841139562845m" },
+            { position: "-0.15618625108412598m 0.28664228131203906m 0.028165421059610368m", normal: "0.013563133342937463m 0.9999075198114622m 0.000996613471734596m" },
+            { position: "-0.09538662535744172m 0.28649488519075916m 0.07290454081837118m", normal: "-0.01992377377097233m 0.9998004155553436m 0.0014738704439865049m" },
+            { position: "-0.02745161206394392m 0.28490541311325146m 0.03163171106649705m", normal: "0.09558832981265031m 0.9954209482834282m -0.00008319945282717455m" },
+            { position: "0.03404888604428743m 0.2839818204031891m 0.050683707557229604m", normal: "0.06573310732090451m 0.9978367892730042m 0.0009489864491033835m" },
+            { position: "0.09159998730507693m 0.2764181127049481m 0.0296744170208172m", normal: "-0.03186979684449101m 0.9994904018627363m 0.0018035058516585915m" },
+            { position: "0.14057529649952052m 0.27494422923715806m 0.04495908336281387m", normal: "-0.06372536120138876m 0.9979674522160247m -0.00020653621761691982m" },
+            { position: "0.19033822480226784m 0.27477007010304244m 0.025677238718560456m", normal: "-0.015863258787586598m 0.9998731102187742m 0.0014561875130062877m" },
+            { position: "0.2453919795549684m 0.2743334106435408m 0.0403175623629584m", normal: "0.031497446410189894m 0.9995030843829598m 0.0012227749536833851m" },
+            { position: "0.2900622635175565m 0.2674461047298883m 0.024018574237115512m", normal: "0.05539106501885599m 0.9984646564320522m 0.00039971502485197636m" },
+            { position: "0.3364956338698987m 0.26485772874715m 0.03781549084917716m", normal: "-0.05121336107487198m 0.9986858708408851m -0.0019295155345188232m" },
+            { position: "0.38834927920218776m 0.2623001026750102m 0.026199098520856327m", normal: "0.09855305649418404m 0.9951312352385489m 0.0010581626785884305m" },
+            { position: "0.43133283105695025m 0.26002544576675124m 0.03776680043586498m", normal: "-0.06231012907289065m 0.9980565625232913m 0.0007387957169639276m" },
+            { position: "0.4705465199883936m 0.2593315219394258m 0.02173398984619827m", normal: "0.11657365585124298m 0.9931819586092023m 0.0004240927552175652m" },
+          ],
         },
-        2: {
+        dhendhem: {
           name: "Dhendhem",
-          desc: "Terdiri dari 6 bilah bambu berukuran besar. Berfungsi sebagai pemangku irama atau bass dalam permainan musik calung banyumasan.",
+          desc: "Dhendhem adalah instrumen musik dalam ansambel Calung Banyumasan yang berfungsi sebagai pemangku irama dengan nada-nada rendah yang khas. Terdiri dari 6 bilah bambu berukuran besar.",
+          modelSrc: "assets/3d/dhendhem-compressed.glb",
           video: "https://www.youtube.com/embed/P-A_6z2X0W0",
+          playText: "Main Dhendhem",
+          hotspotData: [
+            { position: "-0.26994671636451684m 0.36775924675028626m 0.045388206017261096m", normal: "0.001843793256227914m 0.9999878777140525m 0.00456561620964459m" },
+            { position: "-0.1478371702662661m 0.36350725060910155m 0.0451594326578418m", normal: "0.02538628249799671m 0.9996750050315694m 0.002328298963636738m" },
+            { position: "-0.03912326901526829m 0.35259057140892147m 0.04607168419764727m", normal: "-0.022046334018311436m 0.9997568530282714m -0.0004404308804758611m" },
+            { position: "0.07149528364684911m 0.3322274000009217m 0.04271534212123505m", normal: "0.04477476117748163m 0.9989881634313337m 0.004227302401151965m" },
+            { position: "0.179176791439502m 0.3141437452716614m 0.04489213440167674m", normal: "0.03202713997850685m 0.9994818442298368m 0.003210196212300596m" },
+            { position: "0.2778817945866225m 0.3110610138360596m 0.047192975831895384m", normal: "0.0456545043038991m 0.9989523444237345m 0.0031432160425205647m" },
+          ],
+        },
+        kenong: {
+          name: "Kenong",
+          desc: "Kenong adalah alat musik perkusi dalam gamelan yang berfungsi sebagai penanda struktur lagu dan penguat irama pokok dalam ansambel calung.",
+          modelSrc: "assets/3d/gambang-compressed.glb",
+          video: "https://www.youtube.com/embed/P-A_6z2X0W0",
+          playText: "Main Kenong",
+          hotspotData: [],
+        },
+        "gong-bumbung": {
+          name: "Gong Bumbung",
+          desc: "Gong Bumbung adalah alat musik tiup yang terbuat dari bambu, berfungsi sebagai pengganti gong logam dalam ansambel calung Banyumasan.",
+          modelSrc: "assets/3d/gambang-compressed.glb",
+          video: "https://www.youtube.com/embed/P-A_6z2X0W0",
+          playText: "Main Gong Bumbung",
+          hotspotData: [],
         },
       };
 
-      const sheet = document.getElementById("bottomSheet");
-      const content = document.getElementById("sheetContent");
-      const viewer = document.getElementById("viewer");
-      const viewerContainer = document.getElementById("viewerContainer");
+      // ==================== DOM Elements ====================
+      const playMode = document.getElementById("playMode");
+      const playBtn = document.getElementById("playBtn");
+      const backBtn = document.getElementById("backBtn");
+      const playViewer = document.getElementById("playViewer");
+      const rotatePrompt = document.getElementById("rotatePrompt");
+      const continuePortrait = document.getElementById("continuePortrait");
 
-      function openSheet(id, hotspot) {
-        const data = instrumentData[id];
-        if (!data) return;
+      // ==================== URL Parameters ====================
+      const urlParams = new URLSearchParams(window.location.search);
+      const instrumentId = urlParams.get("id") || "gambang";
+      let currentInstrument = instrumentData[instrumentId] || instrumentData["gambang"];
 
-        // Pan and Zoom logic: target the specific hotspot coordinate
-        const pos = hotspot.dataset.position;
-        viewer.cameraTarget = pos;
-        viewer.cameraOrbit = "0deg 75deg 1.5m"; // Closer zoom for detail
-        viewer.fieldOfView = "25deg";
+      // ==================== Load Instrument ====================
+      function loadInstrument(id) {
+        const data = instrumentData[id] || instrumentData["gambang"];
+        currentInstrument = data;
 
-        content.innerHTML = `
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-2xl font-extrabold text-gray-900">${data.name}</h3>
-                    <button onclick="closeSheet()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                        <span class="text-xl">✕</span>
-                    </button>
-                </div>
-                <p class="text-gray-600 mb-6 leading-relaxed">${data.desc}</p>
-                <div class="aspect-video w-full rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
-                    <iframe class="w-full h-full" src="${data.video}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            `;
-
-        // Adjust layout so sheet doesn't cover viewer
-        sheet.classList.replace("h-0", "h-1/2");
+        document.getElementById("instrumentName").textContent = data.name;
+        document.getElementById("instrumentDesc").textContent = data.desc;
+        document.getElementById("viewer").setAttribute("src", data.modelSrc);
+        document.getElementById("videoFrame").src = data.video;
+        document.getElementById("playBtnText").textContent = data.playText;
+        document.title = `${data.name} - Calung Banyumas`;
       }
 
-      function closeSheet() {
-        viewer.cameraTarget = "auto auto auto";
-        viewer.cameraOrbit = "0deg 75deg 2.5m";
-        viewer.fieldOfView = "30deg";
+      // ==================== Play Note ====================
+      function playNote(noteIndex, btn) {
+        // Initialize audio on first interaction
+        audioSystem.init();
 
-        sheet.classList.replace("h-1/2", "h-0");
-        setTimeout(() => {
-          content.innerHTML = "";
-        }, 500);
+        // Visual feedback
+        btn.classList.add("playing");
+        setTimeout(() => btn.classList.remove("playing"), 300);
+
+        // Play sound
+        audioSystem.playNote(noteIndex);
       }
 
-      document.querySelectorAll(".hotspot").forEach((hotspot) => {
-        hotspot.addEventListener("click", () => openSheet(hotspot.dataset.instrument, hotspot));
+      // ==================== Generate Hotspots ====================
+      function generateHotspots() {
+        // Remove existing hotspots
+        const existingHotspots = playViewer.querySelectorAll(".hotspot-3d");
+        existingHotspots.forEach((h) => h.remove());
+
+        // Generate new hotspots based on current instrument
+        const hotspotData = currentInstrument.hotspotData || [];
+
+        hotspotData.forEach((data, index) => {
+          const btn = document.createElement("button");
+          btn.className = "hotspot-3d";
+          btn.setAttribute("slot", `hotspot-${index + 1}`);
+          btn.setAttribute("data-position", data.position);
+          btn.setAttribute("data-normal", data.normal);
+          btn.dataset.note = index;
+
+          const label = document.createElement("span");
+          label.className = "hotspot-label";
+          label.textContent = index + 1;
+          btn.appendChild(label);
+
+          // Add click handler
+          btn.addEventListener("pointerdown", (e) => {
+            e.preventDefault();
+            playNote(index, btn);
+          });
+
+          playViewer.appendChild(btn);
+        });
+      }
+
+      // ==================== Play Mode Controls ====================
+      let isPlayMode = false;
+
+      function enterPlayMode() {
+        isPlayMode = true;
+
+        // Initialize audio context on user interaction
+        audioSystem.init();
+
+        // Request fullscreen mode to hide browser UI
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen().catch(() => {});
+        } else if (elem.webkitRequestFullscreen) {
+          elem.webkitRequestFullscreen(); // Safari
+        } else if (elem.msRequestFullscreen) {
+          elem.msRequestFullscreen(); // IE/Edge
+        }
+
+        // Try to lock to landscape orientation
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(() => {
+            // If can't lock, check if we need to show rotate prompt
+            checkOrientation();
+          });
+        } else {
+          checkOrientation();
+        }
+
+        // Update play viewer source
+        playViewer.setAttribute("src", currentInstrument.modelSrc);
+
+        // Generate hotspots for current instrument
+        setTimeout(() => generateHotspots(), 100);
+
+        // Show play mode
+        playMode.classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      function exitPlayMode() {
+        isPlayMode = false;
+
+        // Exit fullscreen mode
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen(); // Safari
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen(); // IE/Edge
+        }
+
+        // Unlock orientation
+        if (screen.orientation && screen.orientation.unlock) {
+          screen.orientation.unlock();
+        }
+
+        // Hide play mode
+        playMode.classList.remove("active");
+        rotatePrompt.classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
+      function checkOrientation() {
+        if (!isPlayMode) return;
+
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const isMobile = window.innerWidth < 768;
+
+        if (isPortrait && isMobile) {
+          rotatePrompt.classList.add("show");
+        } else {
+          rotatePrompt.classList.remove("show");
+        }
+      }
+
+      // ==================== Event Listeners ====================
+      playBtn.addEventListener("click", enterPlayMode);
+      backBtn.addEventListener("click", exitPlayMode);
+      continuePortrait.addEventListener("click", () => {
+        rotatePrompt.classList.remove("show");
       });
 
+      // Listen for orientation changes
+      window.addEventListener("resize", () => {
+        checkOrientation();
+      });
+
+      // Escape key to exit
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeSheet();
+        if (e.key === "Escape" && isPlayMode) {
+          exitPlayMode();
+        }
       });
+
+      // ==================== Initialize ====================
+      loadInstrument(instrumentId);
     </script>
   </body>
 </html>
